@@ -1,6 +1,30 @@
 var issueContainerEl = document.querySelector("#issues-container");
+var limitWarningEl = document.querySelector("#limit-warning");
+var repoNameEl = document.querySelector("#repo-name")
 
+var getRepoName = function(){
+    var queryString = document.location.search;
+    var repoName = queryString.split("=")[1];
+    if(repoName){
+        
 
+        getRepoIssues(repoName);
+        repoNameEl.textContent = repoName;
+    }else{
+        document.location.replace("./index.html");
+    }
+}
+
+var displayWarning = function(repo){
+    limitWarningEl.textContent = "To see more than 30 issues, visit ";
+
+    var linkEl =document.createElement("a");
+    linkEl.textContent = "See More issues on Github.com";
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+    linkEl.setAttribute("target", "blank");
+    // apend to warning container
+    limitWarningEl.appendChild(linkEl);
+}
 
 
 var displayIssues = function(issues){
@@ -38,7 +62,7 @@ var displayIssues = function(issues){
         issueEl.appendChild(typeEl);
         issueContainerEl.appendChild(issueEl);
     }
-    alert("in display despues loop")
+    
 };
 
 var getRepoIssues = function(repo){
@@ -50,19 +74,22 @@ var getRepoIssues = function(repo){
             if(response.ok){
                 response.json()
                     .then(function(data){
-                        console.log(data);
-                        alert("in repo");
+                       
+                        
                         displayIssues(data);
+                        //check if api has paginated issues
+                        if(response.headers.get("link")){
+                            displayWarning(repo);
+                        }
 
                     });
-            }
-            else{
-                alert("there was a problem with your request!");
-            }
+            }else{
+                    alert("there was a problem with your request!");
+                    document.location.replace("./index.html");
+                }
 
         });
 };
 
+getRepoName();
 
-
-getRepoIssues("facebook/react");
